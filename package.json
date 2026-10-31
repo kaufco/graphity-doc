@@ -1,0 +1,33 @@
+{
+  "name": "graphity-doc",
+  "description": "Solving Graph Problems with Graphity: the problem-oriented documentation of Graphity (Astro Starlight).",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "languages": "node scripts/languages.mjs",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "dev:local-javadoc": "node scripts/local-javadoc.mjs dev",
+    "build:local-javadoc": "node scripts/local-javadoc.mjs build",
+    "api-coverage": "node scripts/api-coverage.mjs",
+    "gaps": "node scripts/gaps.mjs",
+    "check-javadoc-anchors": "node scripts/check-javadoc-anchors.mjs",
+    "check-pictures": "node scripts/check-pictures.mjs",
+    "check-chapters": "node scripts/check-chapters.mjs",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/markdown-satteri": "0.4.5",
+    "@astrojs/starlight": "0.42.7",
+    "astro": "7.4.1",
+    "js-yaml": "4.3.2",
+    "mermaid": "12.2.0",
+    "playwright": "1.64.1",
+    "sharp": "0.35.5"
+  }
+}

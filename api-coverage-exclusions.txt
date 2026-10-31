@@ -1,0 +1,16 @@
+# Public API that the guide does not need to cover; `npm run api-coverage` leaves it out.
+# One entry per line:
+#   Class.method      all overloads of a method (nested types as Outer.Inner.method)
+#   new Class         the public constructors of a class
+#   Class             a whole class
+# equals, hashCode and toString are always left out.
+
+# The methods of the IntList contract that SortedIntView overrides for speed. They behave as for any
+# list; the guide shows SortedIntView as a list ("Work with the lists Graphity returns") without
+# going through them one by one.
+SortedIntView.forEach
+SortedIntView.getElements
+SortedIntView.listIterator
+SortedIntView.spliterator
+SortedIntView.subList
+SortedIntView.toArray

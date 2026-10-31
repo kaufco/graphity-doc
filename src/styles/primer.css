@@ -1,0 +1,216 @@
+/*
+ * The look of the Graphity Javadoc (src/main/javadoc/graphity-javadoc.css) for the guide: GitHub's
+ * Primer design - system fonts, Primer colors, 6px radii, headings with a rule below them - in its
+ * light variant. Code blocks use the GitHub theme of Expressive Code (astro.config.mjs).
+ * Only Starlight's own CSS variables and a few element rules; no web fonts.
+ */
+
+:root {
+	--sl-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial,
+		sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+	--sl-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono',
+		monospace;
+	--sl-text-base: 1.0625rem;
+	--sl-line-height: 1.6;
+	--sl-content-width: 50rem;
+	--sl-sidebar-width: 16rem;
+	--sl-nav-height: 3.5rem;
+	/* The width of the "On this page" column. */
+	--guide-toc-width: 13rem;
+}
+
+:root[data-theme='light'] {
+	/* Primer, light: the same tokens as the Javadoc theme. */
+	--sl-color-accent-low: #ddf4ff;
+	--sl-color-accent: #0969da;
+	--sl-color-accent-high: #0550ae;
+	--sl-color-white: #1f2328;
+	--sl-color-gray-1: #1f2328;
+	--sl-color-gray-2: #424a53;
+	--sl-color-gray-3: #59636e;
+	--sl-color-gray-4: #818b98;
+	--sl-color-gray-5: #d1d9e0;
+	--sl-color-gray-6: #f6f8fa;
+	--sl-color-gray-7: #f6f8fa;
+	--sl-color-black: #ffffff;
+	--sl-color-bg-inline-code: #eff1f3;
+}
+
+/* Header and sidebar on the subtle canvas, like the Javadoc's navigation bar. */
+:root[data-theme='light'] {
+	--sl-color-bg-nav: #f6f8fa;
+	--sl-color-bg-sidebar: #ffffff;
+	--sl-color-hairline-light: #d1d9e0;
+	--sl-color-hairline-shade: #d1d9e0;
+}
+
+/* Headings as in GitHub's Markdown: semibold, h1 and h2 with a rule below. */
+.sl-markdown-content :is(h1, h2, h3, h4) {
+	font-weight: 600;
+	line-height: 1.25;
+}
+/* The size on the wrapper too: Starlight's gap between a heading and its link symbol is in em, on both. */
+.sl-markdown-content h2,
+.sl-markdown-content .sl-heading-wrapper.level-h2 {
+	font-size: 1.5rem;
+}
+.sl-markdown-content .sl-heading-wrapper.level-h2 {
+	padding-bottom: 0.3em;
+	border-bottom: 1px solid var(--sl-color-hairline-light);
+}
+.sl-markdown-content h3,
+.sl-markdown-content .sl-heading-wrapper.level-h3 {
+	font-size: 1.25rem;
+}
+.content-panel h1#_top {
+	font-size: 2rem;
+	padding-bottom: 0.3em;
+	border-bottom: 1px solid var(--sl-color-hairline-light);
+}
+.content-panel {
+	border-top: none;
+}
+
+/* Links in the accent color, underlined on hover only, as on GitHub. */
+.sl-markdown-content a:not(:where(.not-content *)) {
+	text-decoration: none;
+}
+.sl-markdown-content a:not(:where(.not-content *)):hover {
+	text-decoration: underline;
+}
+
+/* Inline code: Primer's neutral background, 6px radius, no border. */
+.sl-markdown-content :not(pre) > code {
+	border: none;
+	border-radius: 6px;
+	padding: 0.2em 0.4em;
+	font-size: 85%;
+	background-color: var(--sl-color-bg-inline-code);
+}
+
+/* Asides as Primer flash boxes: a colored left rule and a light tint. */
+.starlight-aside {
+	border-radius: 6px;
+	border-inline-start-width: 4px;
+}
+
+/* Asides ("In short", "Not in Graphity yet") as Primer's markdown alerts: a colored rule at the
+   start, the title in the accent color, no fill. */
+.starlight-aside {
+	background-color: transparent;
+	border-inline-start-width: 4px;
+	padding: 0.5rem 1rem;
+}
+.starlight-aside__title {
+	font-size: var(--sl-text-base);
+}
+.starlight-aside__content ul {
+	padding-inline-start: 1.25rem;
+}
+.starlight-aside__content li + li {
+	margin-top: 0.25rem;
+}
+
+/* Sidebar as GitHub's navigation lists: plain entries, the current page bold on a light background
+   with an accent rule; chapters bold, their problems indented. */
+.sidebar-content a,
+.sidebar-content a.large {
+	font-size: var(--sl-text-sm);
+	font-weight: 400;
+	color: var(--sl-color-gray-2);
+	border-radius: 0 6px 6px 0;
+	border-inline-start: 3px solid transparent;
+}
+.sidebar-content a.sidebar-chapter {
+	font-weight: 600;
+	color: var(--sl-color-white);
+}
+/* "On this page" like the navigation, in the column and in its dropdown on a narrow screen: the
+   current section marked as the current page. */
+.right-sidebar-panel a,
+mobile-starlight-toc a {
+	border-inline-start: 3px solid transparent;
+}
+.right-sidebar-panel a {
+	border-radius: 0 6px 6px 0;
+}
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover,
+.sidebar-content a[aria-current='page']:focus,
+.right-sidebar-panel a[aria-current='true'],
+mobile-starlight-toc a[aria-current='true'] {
+	font-weight: 600;
+	color: var(--sl-color-white);
+	background-color: var(--sl-color-gray-6);
+	border-inline-start-color: var(--sl-color-accent);
+}
+mobile-starlight-toc a[aria-current='true']::after {
+	display: none;
+}
+.sidebar-content a:hover,
+.right-sidebar-panel a:hover,
+mobile-starlight-toc a:hover {
+	background-color: var(--sl-color-gray-6);
+}
+
+/* Layout: sidebar, content and "On this page" side by side in one column of fixed width, centered on
+   a wide screen, as on GitHub, instead of the sidebars at the edges of the screen. */
+@media (min-width: 50rem) {
+	/* The sidebar takes the room beside the text: 24rem where there is room, down to 16rem, so that
+	   the text keeps its width. */
+	:root {
+		--sl-sidebar-width: clamp(16rem, 100vw - var(--sl-content-width) - 2 * var(--sl-content-pad-x), 24rem);
+	}
+	:root[data-has-sidebar] {
+		--guide-frame-width: calc(var(--sl-sidebar-width) + var(--sl-content-width) + 2 * var(--sl-content-pad-x));
+		--guide-offset: max(0rem, (100vw - var(--guide-frame-width)) / 2);
+		--sl-content-inline-start: calc(var(--guide-offset) + var(--sl-sidebar-width));
+	}
+	.sidebar-pane {
+		inset-inline-start: var(--guide-offset);
+		border-inline-end: none;
+	}
+	/* The header bar (PageFrame) spans the screen; its content (Header) spans the column. */
+	header.header {
+		padding-inline: calc(var(--guide-offset) + var(--sl-sidebar-pad-x));
+	}
+}
+@media (min-width: 72rem) {
+	/* The column has room for "On this page" on every page, also on pages without it, so that the
+	   text stands in the same place on all pages. */
+	:root {
+		--sl-sidebar-width: clamp(
+			16rem,
+			100vw - var(--sl-content-width) - 2 * var(--sl-content-pad-x) - var(--guide-toc-width),
+			24rem
+		);
+	}
+	:root[data-has-sidebar] {
+		--guide-frame-width: calc(
+			var(--sl-sidebar-width) + var(--sl-content-width) + 2 * var(--sl-content-pad-x) +
+				var(--guide-toc-width)
+		);
+	}
+	:root[data-has-sidebar] .main-pane {
+		width: calc(var(--sl-content-width) + 2 * var(--sl-content-pad-x)) !important;
+		--sl-content-margin-inline: 0;
+	}
+	/* Where the column is wider than the screen, the text gives way, not "On this page". */
+	.right-sidebar-container {
+		flex: none;
+		width: var(--guide-toc-width) !important;
+		margin-inline-start: 0;
+	}
+	.right-sidebar {
+		width: var(--guide-toc-width);
+		border-inline-start: none;
+	}
+	.right-sidebar-panel {
+		width: var(--guide-toc-width) !important;
+	}
+	/* Starlight sizes this by the width of the sidebar. */
+	.right-sidebar-panel .sl-container {
+		width: auto;
+		max-width: none;
+	}
+}

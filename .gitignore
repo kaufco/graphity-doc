@@ -1,0 +1,12 @@
+# Dependencies, build output, generated types
+node_modules/
+dist/
+dist-*/
+.astro/
+
+# Local copies of the API documentation (npm run build:local-javadoc)
+public/api/
+public/rustdoc/
+
+# Checkouts of the libraries the guide documents (languages.json)
+languages/

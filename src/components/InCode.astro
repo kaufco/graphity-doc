@@ -1,0 +1,27 @@
+---
+// A piece of code in the text that differs between the languages, such as the value for "no loop":
+// <InCode java="-1" rust="None" ts="-1" csharp="-1" />. Follows the language picker like <Api>.
+// Every language of the build needs its form; a missing one fails the build.
+import { AVAILABLE_LANGUAGES, LANGUAGES } from '../lib/examples.mjs';
+
+type Props = { [key: string]: string | undefined };
+
+const unknown = Object.keys(Astro.props).filter((key) => !LANGUAGES.some((language) => language.key === key));
+const missing = AVAILABLE_LANGUAGES.filter((language) => Astro.props[language.key] === undefined);
+if (unknown.length || missing.length) {
+	throw new Error(
+		`<InCode java="${Astro.props.java}"> on ${Astro.url.pathname}: ` +
+			(unknown.length ? `unknown prop ${unknown.join(', ')}` : `no form in ${missing.map((l) => l.key).join(', ')}`),
+	);
+}
+---
+
+{
+	AVAILABLE_LANGUAGES.length > 1
+		? AVAILABLE_LANGUAGES.map((language) => (
+				<code class={`lang-${language.key}`} data-pagefind-ignore={language.key === 'java' ? undefined : ''}>
+					{Astro.props[language.key]}
+				</code>
+			))
+		: <code>{Astro.props.java}</code>
+}

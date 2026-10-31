@@ -1,0 +1,10 @@
+---
+// The problems of the current chapter, for the top of its chapter page.
+import { chapterOf } from '../lib/structure.mjs';
+import ProblemList from './ProblemList.astro';
+
+const chapter = chapterOf(Astro.locals.starlightRoute.id);
+if (!chapter) throw new Error(`<ChapterProblems> on ${Astro.url.pathname}: not a chapter page`);
+---
+
+<ProblemList problems={chapter.problems} />

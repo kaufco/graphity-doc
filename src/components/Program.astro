@@ -1,0 +1,34 @@
+---
+// The source of a program that an example works on, not code of the library: <Program name="load" />
+// shows the method `load` whose control flow the examples analyze. src/programs/<name>.<extension>
+// holds it in each language (`extension` in src/lib/languages.mjs); the page shows the version in the
+// language the reader selected, like <Example>. Every language of the build needs its version; a
+// missing file fails the build.
+import fs from 'node:fs';
+import path from 'node:path';
+import { Code } from '@astrojs/starlight/components';
+import { AVAILABLE_LANGUAGES } from '../lib/languages.mjs';
+import { guideRelative, guideRoot } from '../lib/paths.mjs';
+
+interface Props {
+	name: string;
+}
+
+const { name } = Astro.props;
+const versions = AVAILABLE_LANGUAGES.map((language) => {
+	const file = path.join(guideRoot, 'src', 'programs', `${name}.${language.extension}`);
+	if (!fs.existsSync(file)) {
+		throw new Error(`<Program name="${name}"> on ${Astro.url.pathname}: ${guideRelative(file)} does not exist`);
+	}
+	return { ...language, code: fs.readFileSync(file, 'utf8').trimEnd() };
+});
+const single = versions.length === 1;
+---
+
+{
+	versions.map((version) => (
+		<div class={single ? 'example' : `example lang-${version.key}`} data-pagefind-ignore="">
+			<Code code={version.code} lang={version.lang} />
+		</div>
+	))
+}

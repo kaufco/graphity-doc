@@ -1,0 +1,18 @@
+---
+// Starlight's page content: on a chapter or problem page its sentence first, the one that the contents
+// page and the list of problems show, and at the end the "API used" section when the page has an `api`
+// list.
+import Default from '@astrojs/starlight/components/MarkdownContent.astro';
+import { chapterOf } from '../../lib/structure.mjs';
+import ApiUsed from '../ApiUsed.astro';
+
+const { entry, id } = Astro.locals.starlightRoute;
+const api = entry.data.api;
+const sentence = chapterOf(id) ? entry.data.description : undefined;
+---
+
+<Default>
+	{sentence && <p>{sentence}</p>}
+	<slot />
+	{api && api.length > 0 && <ApiUsed refs={api} />}
+</Default>

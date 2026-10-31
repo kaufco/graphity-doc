@@ -1,0 +1,65 @@
+---
+// The "API used" section at the end of a page, from its `api` frontmatter field. Its id "api-used"
+// is also the table-of-contents entry added in src/route-middleware.ts. Each entry shows the Java
+// signature, and in another language its name, with the parameter list where it keeps overloads
+// under the name. In another language, an entry is hidden (class api-hidden-<key>, styled in
+// astro.config.mjs) where it has no counterpart, and where it repeats an earlier one because Java
+// overloads are one method there.
+//
+// Below the list stand the bare names of these methods, in every language, for the search only: the
+// index keeps `DotWriter.nodeFilter` as one word, and `nodeFilter` alone would not find it.
+import AnchorHeading from '@astrojs/starlight/components/AnchorHeading.astro';
+import { resolveRef } from '../lib/java-api.mjs';
+import { portTargets, withoutOwner } from '../lib/lang-api.mjs';
+
+interface Props {
+	refs: string[];
+}
+
+const seen = new Set<string>();
+const targets = Astro.props.refs.map((ref) => {
+	let target;
+	try {
+		target = { ...resolveRef(ref), ports: portTargets(ref) };
+	} catch (error) {
+		const page = Astro.locals.starlightRoute.entry.filePath ?? Astro.url.pathname;
+		throw new Error(`"api" frontmatter of ${page}: ${(error as Error).message}`);
+	}
+	const hidden = target.ports.filter((port) => {
+		if (!port.url) return true;
+		const key = `${port.key} ${port.signature}`;
+		return seen.has(key) || !seen.add(key);
+	});
+	return { ...target, hiddenClasses: hidden.map((port) => `api-hidden-${port.key}`).join(' ') || undefined };
+});
+const searchNames = new Set(
+	targets.flatMap((target) =>
+		[target.member?.name ?? target.type.name, ...target.ports.flatMap((port) => (port.label ? [withoutOwner(port.label)] : []))].map(
+			(name) => name.toLowerCase(),
+		),
+	),
+);
+---
+
+<AnchorHeading level="2" id="api-used">API used</AnchorHeading>
+<ul class="api-used">
+	{
+		targets.map((target) => (
+			<li class={target.hiddenClasses}>
+				<a class={`api-link${target.ports.length ? ' lang-java' : ''}`} href={target.url}>
+					<code>{target.signature}</code>
+				</a>
+				{target.ports.map((port) =>
+					port.url ? (
+						<a class={`api-link lang-${port.key}`} href={port.url} title={port.note ?? undefined} data-pagefind-ignore="">
+							<code>{port.signature}</code>
+						</a>
+					) : (
+						<code class={`lang-${port.key}`} title={port.reason ?? undefined} data-pagefind-ignore="">{port.label ?? target.signature}</code>
+					),
+				)}
+			</li>
+		))
+	}
+</ul>
+<p class="sr-only" aria-hidden="true">{[...searchNames].join(' ')}</p>

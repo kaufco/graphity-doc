@@ -1,0 +1,27 @@
+---
+// Two diagrams side by side - a graph before and after - so that the reader sees what changed; on a
+// narrow screen they stack, each under its caption. The children are the two ```mermaid blocks,
+// each with a blank line before and after it. For the eye to compare them, the two diagrams keep
+// their nodes in the same places: nodes and edges that only one of them has are in the other as
+// well, hidden (classDef hidden, and ~~~ for an edge). One legend below both shows the marks that the
+// two use; `legend` gives a mark the name it has here (legendColumns in src/lib/legend.mjs).
+import { legendColumns } from '../lib/legend.mjs';
+import Legend from './Legend.astro';
+
+interface Props {
+	before?: string;
+	after?: string;
+	legend?: Record<string, string>;
+}
+
+const { before = 'Before', after = 'After', legend = {} } = Astro.props;
+const diagrams = await Astro.slots.render('default');
+const columns = legendColumns(diagrams, legend);
+---
+
+<figure class="compare">
+	<figcaption class="compare-caption">{before}</figcaption>
+	<figcaption class="compare-caption">{after}</figcaption>
+	<Fragment set:html={diagrams} />
+	{columns.length > 0 && <Legend columns={columns} />}
+</figure>

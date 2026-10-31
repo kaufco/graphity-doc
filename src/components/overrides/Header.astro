@@ -1,0 +1,81 @@
+---
+// The header: the title at the left edge of the page's column, the search at its right edge. On a
+// narrow screen, the search opens as the menu does: the title stays, the panel lies below it, and the
+// symbol becomes a close symbol. That symbol only shows: Starlight's search dialog covers the screen
+// and closes on a click outside its panel, and above the panel it is transparent.
+import { Icon } from '@astrojs/starlight/components';
+import Search from '@astrojs/starlight/components/Search.astro';
+import SiteTitle from '@astrojs/starlight/components/SiteTitle.astro';
+---
+
+<div class="header">
+	<div class="title-wrapper sl-flex">
+		<SiteTitle />
+	</div>
+	<div class="search-wrapper sl-flex print:hidden">
+		<Search />
+		<Icon name="close" class="search-close" size="1.25rem" />
+	</div>
+</div>
+
+<style>
+	.header {
+		display: flex;
+		gap: var(--sl-nav-gap);
+		justify-content: space-between;
+		align-items: center;
+		height: 100%;
+	}
+	.title-wrapper {
+		/* A long title on a narrow screen must not cover the search and the menu button. */
+		overflow: clip;
+		/* Keeps the focus ring around the link in the title. */
+		padding: 0.25rem;
+		margin: -0.25rem;
+		min-width: 0;
+	}
+	.search-wrapper {
+		position: relative;
+		flex: none;
+	}
+	.search-close {
+		display: none;
+	}
+	@media (min-width: 50rem) {
+		.search-wrapper {
+			width: 16rem;
+		}
+	}
+	@media (max-width: 49.99rem) {
+		:global([data-search-modal-open]) .search-close {
+			display: block;
+			position: absolute;
+			inset: 0;
+			margin: auto;
+			color: var(--sl-color-gray-1);
+		}
+		:global([data-search-modal-open] button[data-open-modal]) {
+			visibility: hidden;
+		}
+		:global(site-search dialog) {
+			border: 0;
+			background: none;
+			box-shadow: none;
+		}
+		:global(site-search dialog::backdrop) {
+			background: none;
+			-webkit-backdrop-filter: none;
+			backdrop-filter: none;
+		}
+		:global(site-search .dialog-frame) {
+			margin-top: var(--sl-nav-height);
+			background-color: var(--sl-color-black);
+		}
+		:global(site-search button[data-close-modal]) {
+			display: none;
+		}
+		:global(#starlight__search) {
+			--sl-search-cancel-space: 0px;
+		}
+	}
+</style>

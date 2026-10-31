@@ -1,0 +1,87 @@
+---
+// Every method that a problem page uses, with the problems that use it: the way into the
+// guide from a function ("what is sccsOf good for?"). From the `api` frontmatter of the pages.
+// With other languages in the build, each has a list of its own, which follows the language picker:
+// its names, sorted as they read in that language; Java overloads that are one method there are one
+// entry, with the problems of all of them; a method without a counterpart there is left out.
+import { getCollection } from 'astro:content';
+import { resolveRef } from '../lib/java-api.mjs';
+import { portTargets } from '../lib/lang-api.mjs';
+import { PORTS } from '../lib/languages.mjs';
+import { pageNumbers } from '../lib/structure.mjs';
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const numbers = pageNumbers();
+const byMember = new Map();
+for (const entry of await getCollection('docs')) {
+	for (const ref of entry.data.api ?? []) {
+		const target = resolveRef(ref);
+		const key = target.signature;
+		if (!byMember.has(key)) byMember.set(key, { target, ports: portTargets(ref), pages: new Map() });
+		byMember.get(key).pages.set(entry.id, {
+			slug: entry.id,
+			number: numbers.get(entry.id) ?? '',
+			title: entry.data.title,
+		});
+	}
+}
+const order = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+const byNumber = (a, b) => a.number.localeCompare(b.number, 'en', { numeric: true });
+const sorted = (entries) =>
+	entries.sort((a, b) => order(a.label, b.label)).map((e) => ({ ...e, pages: [...e.pages.values()].sort(byNumber) }));
+
+const members = [...byMember.values()];
+const lists = [
+	{
+		key: 'java',
+		entries: sorted(members.map(({ target, pages }) => ({ label: target.signature, url: target.url, title: undefined, pages }))),
+	},
+	...PORTS.map((language, i) => {
+		const entries = new Map();
+		for (const { ports, pages } of members) {
+			const port = ports[i];
+			if (!port.url) continue;
+			// One entry per name the language shows; a name with two pages (a method that Rust reaches
+			// through Deref is on both) links the first.
+			if (!entries.has(port.signature)) {
+				entries.set(port.signature, { label: port.signature, url: port.url, notes: new Set(), pages: new Map() });
+			}
+			const entry = entries.get(port.signature);
+			if (port.note) entry.notes.add(port.note);
+			for (const [slug, page] of pages) entry.pages.set(slug, page);
+		}
+		return {
+			key: language.key,
+			entries: sorted([...entries.values()].map(({ notes, ...e }) => ({ ...e, title: [...notes].join(' ') || undefined }))),
+		};
+	}),
+];
+---
+
+{
+	lists.map((list) => (
+		<dl class={PORTS.length ? `api-index lang-${list.key}` : 'api-index'} data-pagefind-ignore={list.key === 'java' ? undefined : ''}>
+			{list.entries.map((entry) => (
+				<>
+					<dt>
+						<a class="api-link" href={entry.url} title={entry.title}>
+							<code>{entry.label}</code>
+						</a>
+					</dt>
+					<dd>
+						<ul>
+							{entry.pages.map((p) => (
+								<li>
+									<a href={`${base}${p.slug}/`}>
+										<span class="problem-number">{p.number}</span>{' '}
+										{p.title}
+									</a>
+								</li>
+							))}
+						</ul>
+					</dd>
+				</>
+			))}
+		</dl>
+	))
+}

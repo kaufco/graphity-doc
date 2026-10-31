@@ -1,0 +1,154 @@
+---
+title: Number the nodes in a different order
+description: You renumber a graph in depth-first order or in an order of your own, such as a topological one.
+api:
+  - NodeMapping.reindex(Graph)
+  - NodeMapping.forPermutation(IntList)
+  - TopOrder.of(Graph)
+  - NodeMapping.of(int[])
+  - Graphs.remapped(Graph, NodeMapping)
+  - DfsTraverser.enterNode(int)
+  - DfsTraverser.run(int)
+  - DfsTraverser.run()
+---
+
+import Example from '../../../components/Example.astro';
+import Api from '../../../components/Api.astro';
+import Compare from '../../../components/Compare.astro';
+import Gap from '../../../components/Gap.astro';
+import InCode from '../../../components/InCode.astro';
+
+:::note[In short]
+- <Api ref="NodeMapping.reindex(Graph)" /> numbers the nodes in the order of a [depth-first
+  search](../../glossary/#depth-first-search).
+- <Api ref="NodeMapping.forPermutation(IntList)" /> numbers them in an order you give, such as the
+  [topological order](../../glossary/#topological-order) from <Api ref="TopOrder.of(Graph)" />.
+- <Api ref="Graphs.remapped(Graph, NodeMapping)" /> builds the renumbered graph.
+:::
+
+## Problem
+
+You want the nodes of a graph numbered in an order that suits your next step. The
+[node IDs](../../glossary/#node-id) of a graph often follow from how it was built, such as the order
+in which a parser met the methods or in which the rows of a database came. Another numbering helps
+in these cases:
+
+- Many searches run over a large graph. In the order of a depth-first search, nodes that the search
+  visits one after another get adjacent node IDs. Later searches then read the arrays of the graph
+  more sequentially, which can make these searches faster.
+- A loop runs over the nodes by node ID, such as the steps of a build plan. In a topological order,
+  the loop meets the [source](../../glossary/#source-and-target) of every edge before its target.
+- A report lists the nodes by node ID. If you number them by name, every list of node IDs comes out
+  sorted by name.
+
+## Example
+
+The first example graph `calls` models the calls between the ten methods of a small program. It has
+an edge from each method to each method it calls. A depth-first search from `main` (node 0) visits
+the methods in an order of its own. What node ID does each method get in that order?
+
+The second example graph `steps` models the steps that build and publish the program. It has an edge
+`a -> b` if step `b` may start only after step `a`. The steps get the node IDs of a topological
+order.
+
+The picture after shows the calls with their new node IDs:
+
+<Compare
+  before="The calls between the methods"
+  after="The calls, numbered in depth-first order"
+  legend={{ outputNode: 'Method with its new node ID', outputEdge: 'From a method to a method it calls' }}
+>
+
+```mermaid
+flowchart TB
+  m0["0: main"]
+  m1["1: parseArgs"]
+  m2["2: run"]
+  m3["3: load"]
+  m4["4: save"]
+  m5["5: show"]
+  m6["6: parse"]
+  m7["7: format"]
+  m8["8: read"]
+  m9["9: write"]
+  m0 --> m1
+  m0 --> m2
+  m2 --> m3
+  m2 --> m4
+  m2 --> m5
+  m3 --> m6
+  m3 --> m8
+  m4 --> m7
+  m4 --> m9
+  m5 --> m7
+  m6 --> m6
+  m7 --> m7
+```
+
+```mermaid
+flowchart TB
+  m0["0: main"]
+  m1["1: parseArgs"]
+  m2["2: run"]
+  m3["3: load"]
+  m4["6: save"]
+  m5["9: show"]
+  m6["4: parse"]
+  m7["7: format"]
+  m8["5: read"]
+  m9["8: write"]
+  m0 --> m1
+  m0 --> m2
+  m2 --> m3
+  m2 --> m4
+  m2 --> m5
+  m3 --> m6
+  m3 --> m8
+  m4 --> m7
+  m4 --> m9
+  m5 --> m7
+  m6 --> m6
+  m7 --> m7
+  classDef outputNode fill:#10b98126,stroke:#10b981,stroke-width:2px,color:#1f2328
+  class m0,m1,m2,m3,m4,m5,m6,m7,m8,m9 outputNode
+  linkStyle 0,1,2,3,4,5,6,7,8,9,10,11 stroke:#10b981,stroke-width:3px
+```
+
+</Compare>
+
+## Solution
+
+<Example java="guide/TransformingGraphs.java#renumber" />
+
+Both [mappings](../../glossary/#mapping) go from new to old node IDs. In depth-first order, `load`
+keeps node ID 3 and is followed by the methods it calls: `parse` and `read`. Only then come `save`
+and the methods it calls, and `show` comes last. In the topological order, the steps start with
+`lint` and `generate`, which wait for no other step. Every edge of
+<InCode java="inRunOrder" rust="in_run_order" ts="inRunOrder" csharp="inRunOrder" /> leads to a higher node ID.
+
+## Good to know
+
+- **Where the search starts.** <Api ref="NodeMapping.reindex(Graph)" /> starts at node 0, takes
+  the [out-nodes](../../glossary/#out-node-and-in-node) of each node in ascending order, and starts
+  again at the smallest node it has not visited, until every node has a new node ID. For another
+  start node, collect the nodes in a list `order` in
+  <Api ref="DfsTraverser.enterNode(int)" label="enterNode" />, in the order a
+  <Api ref="DfsTraverser" /> enters them. Run it for the start node with
+  <Api ref="DfsTraverser.run(int)" label="run(start)" />, then for the rest with
+  <Api ref="DfsTraverser.run()" label="run()" />. See
+  [Write a depth-first search without recursion](../../searches/dfs/) for such a traverser. Pass
+  <InCode java="order" rust="&order" ts="order" csharp="CollectionsMarshal.AsSpan(order)" />, which
+  holds every node once, to <Api ref="NodeMapping.forPermutation(IntList)" />.
+- **A mapping of your own.** <Api ref="NodeMapping.of(int[])" /> takes an array from new to old node
+  IDs, for any numbering you compute yourself.
+- **A topological order needs a [DAG](../../glossary/#dag) (directed acyclic graph).**
+  <Api ref="TopOrder.of(Graph)" /> rejects a graph with a [cycle](../../glossary/#cycle). See [Put
+  the nodes in dependency order](../../order-and-cycles/topological-order/). For a graph with
+  cycles, see [Put the nodes in dependency order although the graph has
+  cycles](../../sccs/order-despite-cycles/).
+- **The data follows** the new numbering. Node data follows through the same mapping. See [Carry
+  node data over to a transformed graph](../node-data/). The
+  [edge indices](../../glossary/#edge-index) change too. See [Carry edge data over to a transformed
+  graph](../edge-data/).
+- **Renumbering for speed** costs a depth-first search and a copy of the graph. On a large graph
+  that many searches follow, it can make them faster; on a small graph, it makes no difference.

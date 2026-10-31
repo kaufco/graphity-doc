@@ -1,0 +1,168 @@
+---
+title: Put the nodes in dependency order although the graph has cycles
+description: You get an order of the strongly connected components in which each comes after the ones it depends on.
+api:
+  - Components.sccsOf(Graph)
+  - Sccs.sccCount()
+  - Sccs.sccOf(int)
+  - NodePartition.nodesOf(int)
+---
+
+import Example from '../../../components/Example.astro';
+import Api from '../../../components/Api.astro';
+import Compare from '../../../components/Compare.astro';
+
+:::note[In short]
+- <Api ref="Components.sccsOf(Graph)" /> numbers the
+  [SCCs](../../glossary/#strongly-connected-component) (strongly connected components) so that every
+  edge between two of them goes from the higher SCC ID to the lower one.
+- If you go through the SCC IDs from 0 upward, every SCC comes after the SCCs its nodes depend on.
+- The nodes of one SCC depend on each other and come together.
+:::
+
+## Problem
+
+You need an order in which every node comes after the nodes it depends on. But the graph has
+[cycles](../../glossary/#cycle), so there is no [topological
+order](../../glossary/#topological-order). For a graph without cycles, see [Put the nodes in
+dependency order](../../order-and-cycles/topological-order/). The nodes on a cycle cannot be ordered
+among themselves, so they have to be handled together. The other nodes can still be ordered before
+and after such a group. You need this for:
+
+- a build, in which packages that use each other are built together;
+- the initialization of modules or services that refer to each other;
+- the evaluation of formulas that refer to each other: a group of formulas that does so in a cycle
+  is computed together, again and again until its values no longer change.
+
+## Example
+
+The example graph `dependencies` models the dependencies between the packages of a small program. It
+has an edge from each package to each package it uses. The array `names` holds the names of the
+packages. `model` and `storage` use each other, so no order puts each package after all packages it
+uses. In which order can the packages be built? The picture after shows the SCCs in green frames,
+with their IDs. `util` comes first and `app` comes last. `model` and `storage` come together: the
+two orange edges of their cycle lie inside one frame.
+
+<Compare
+  before="The packages and their dependencies"
+  after="The SCCs, numbered in dependency order"
+  legend={{ inputNode: 'Package asked about', outputGroup: 'SCC' }}
+>
+
+```mermaid
+flowchart TB
+  subgraph s0["SCC 0"]
+    n7["7: util"]
+  end
+  subgraph s1["SCC 1"]
+    n1["1: cli"]
+  end
+  subgraph s2["SCC 2"]
+    n6["6: json"]
+  end
+  subgraph s3["SCC 3"]
+    direction LR
+    n4["4: model"]
+    n5["5: storage"]
+  end
+  subgraph s4["SCC 4"]
+    n3["3: service"]
+  end
+  subgraph s5["SCC 5"]
+    n2["2: ui"]
+  end
+  subgraph s6["SCC 6"]
+    n0["0: app"]
+  end
+  n0 --> n1
+  n0 --> n2
+  n0 --> n3
+  n1 --> n7
+  n2 --> n3
+  n2 --> n4
+  n2 --> n7
+  n3 --> n4
+  n3 --> n5
+  n4 --> n5
+  n5 --> n4
+  n5 --> n6
+  n5 --> n7
+  n6 --> n7
+  classDef hidden fill:none,stroke:none,color:#ffffff00
+  classDef inputNode fill:#3b82f626,stroke:#3b82f6,stroke-width:2px,color:#1f2328
+  class s0,s1,s2,s3,s4,s5,s6 hidden
+  class n2,n6 inputNode
+```
+
+```mermaid
+flowchart TB
+  subgraph s0["SCC 0"]
+    n7["7: util"]
+  end
+  subgraph s1["SCC 1"]
+    n1["1: cli"]
+  end
+  subgraph s2["SCC 2"]
+    n6["6: json"]
+  end
+  subgraph s3["SCC 3"]
+    direction LR
+    n4["4: model"]
+    n5["5: storage"]
+  end
+  subgraph s4["SCC 4"]
+    n3["3: service"]
+  end
+  subgraph s5["SCC 5"]
+    n2["2: ui"]
+  end
+  subgraph s6["SCC 6"]
+    n0["0: app"]
+  end
+  n0 --> n1
+  n0 --> n2
+  n0 --> n3
+  n1 --> n7
+  n2 --> n3
+  n2 --> n4
+  n2 --> n7
+  n3 --> n4
+  n3 --> n5
+  n4 --> n5
+  n5 --> n4
+  n5 --> n6
+  n5 --> n7
+  n6 --> n7
+  classDef inputNode fill:#3b82f626,stroke:#3b82f6,stroke-width:2px,color:#1f2328
+  classDef outputGroup fill:#10b98114,stroke:#10b981,stroke-width:1px
+  class n2,n6 inputNode
+  class s0,s1,s2,s3,s4,s5,s6 outputGroup
+  linkStyle 9,10 stroke:#f59e0b,stroke-width:3px
+```
+
+</Compare>
+
+## Solution
+
+The SCC IDs are already the order:
+
+<Example java="guide/OrderingDespiteCycles.java#buildOrder" />
+
+The result lists the packages SCC by SCC, in the order of the SCC IDs of the picture after. Each
+package comes after the packages it uses. The exception is the one SCC of two packages, which must
+be built together. To compare the positions of two packages, compare their SCC IDs: `json` comes
+before `ui`.
+
+## Good to know
+
+- **Why the IDs are an order.** <Api ref="Components.sccsOf(Graph)" /> numbers the SCCs so that
+  every edge between two SCCs goes from the higher SCC ID to the lower one: SCC 0 has no edge to
+  another SCC. On edges that mean "uses" or "depends on", the IDs from 0 upward are therefore an
+  order in which every SCC comes after the SCCs it uses. That order is the reverse of a topological
+  order of the SCCs.
+- **Without cycles.** In a [DAG](../../glossary/#dag) (directed acyclic graph), every SCC is a
+  single node, and the SCC IDs order the nodes themselves. That order is the reverse of a
+  topological order.
+- **The [condensed graph](../../glossary/#condensed-graph).** See
+  [Condense each group into one node to get a DAG](../condense-to-dag/) for when you need its
+  edges and not just the order.

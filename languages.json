@@ -1,0 +1,6 @@
+{
+	"java": { "repository": "kaufco/graphity", "ref": "3.0.0" },
+	"rust": { "repository": "kaufco/graphity-rust", "ref": "3.0.0" },
+	"ts": { "repository": "kaufco/graphity-ts", "ref": "3.0.0" },
+	"csharp": { "repository": "kaufco/graphity-csharp", "ref": "3.0.0" }
+}

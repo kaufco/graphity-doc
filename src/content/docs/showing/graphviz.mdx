@@ -1,0 +1,99 @@
+---
+title: Draw a graph with Graphviz
+description: You write a graph in the DOT language of Graphviz, with labels from your own data.
+api:
+  - DotWriter.of(Graph)
+  - DotWriter.nodeLabel(IntFunction)
+  - DotWriter.edgeLabel(IntFunction)
+  - DotWriter.graphAttribute(String, String)
+  - DotWriter.write(Appendable)
+  - DotWriter.writeToString()
+---
+
+import Example from '../../../components/Example.astro';
+import Api from '../../../components/Api.astro';
+import Compare from '../../../components/Compare.astro';
+import Gap from '../../../components/Gap.astro';
+import InCode from '../../../components/InCode.astro';
+
+:::note[In short]
+- <Api ref="DotWriter.of(Graph)" /> starts a writer for the DOT language of Graphviz.
+- <Api ref="DotWriter.nodeLabel(IntFunction)" /> takes the label of each node from your data, by
+  [node ID](../../glossary/#node-id).
+- <Api ref="DotWriter.edgeLabel(IntFunction)" /> takes the label of each edge from your data, by
+  [edge index](../../glossary/#edge-index).
+- <Api ref="DotWriter.graphAttribute(String, String)" /> sets an attribute of the whole graph, such
+  as `rankdir` to `LR` for left to right.
+- <Api ref="DotWriter.write(Appendable)" /> writes the text to a file or any other output.
+:::
+
+## Problem
+
+You want a picture of a graph. Graphviz is a program that lays out graphs by itself and draws them
+as SVG, PNG or PDF. It reads a small text language called DOT and handles graphs larger than Mermaid
+does. You need this for:
+
+- a picture of a graph for a document or a review;
+- a look at the result of an analysis, to understand it;
+- a graph too large for a Mermaid flowchart.
+
+## Example
+
+The example graph `dependencies` models the dependencies between the eight packages of a small
+program. It has an edge from each package to each package it uses. The array `names` holds the names
+of the packages. The graph should be drawn from left to right, with the names of the packages on the
+nodes.
+
+## Solution
+
+<Example java="guide/ShowingGraphs.java#dot" />
+
+The writer writes the graph attributes, then every node with its label, then every edge. Nodes and
+edges follow the order of the node IDs and edge indices, so that the same graph always gives the
+same text. The result is this text:
+
+```text
+digraph {
+  rankdir="LR";
+  0 [label="app"];
+  1 [label="cli"];
+  2 [label="ui"];
+  3 [label="service"];
+  4 [label="model"];
+  5 [label="storage"];
+  6 [label="json"];
+  7 [label="util"];
+  0 -> 1;
+  0 -> 2;
+  0 -> 3;
+  1 -> 7;
+  2 -> 3;
+  2 -> 4;
+  2 -> 7;
+  3 -> 4;
+  3 -> 5;
+  4 -> 5;
+  5 -> 4;
+  5 -> 6;
+  5 -> 7;
+  6 -> 7;
+}
+```
+
+The command `dot -Tsvg packages.dot -o packages.svg` turns the text into a picture:
+
+![The dependencies between the packages, drawn by Graphviz from left to right](./graphviz-packages.svg)
+
+## Good to know
+
+- **Other attributes of the whole graph**, such as `fontname`, go through
+  <Api ref="DotWriter.graphAttribute(String, String)" label="graphAttribute" /> as well.
+- **Labels are escaped** for DOT. A label of <InCode java="null" rust="None" ts="null" csharp="null" /> leaves a node
+  unlabeled, and Graphviz then shows its node ID.
+- **Which nodes are listed.** Every edge is written. A node in no frame gets a line of its own only
+  if it has a label or attributes, or if it has no edge in the text. Graphviz creates the other
+  nodes from their edges.
+- **Into a file.** <Api ref="DotWriter.write(Appendable)" /> writes to any
+  <InCode java="Appendable" rust="io::Write" ts="TextSink" csharp="TextWriter" />, such as a <InCode java="Writer" rust="BufWriter" ts="WriteStream" csharp="StreamWriter" /> on a
+  file; <Api ref="DotWriter.writeToString()" /> returns the text.
+- **Styles and frames.** See [Highlight nodes, edges and groups in Graphviz](../graphviz-styled/).

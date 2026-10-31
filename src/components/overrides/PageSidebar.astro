@@ -1,0 +1,16 @@
+---
+// The column at the right of the page: the language picker above "On this page".
+import Default from '@astrojs/starlight/components/PageSidebar.astro';
+import LanguagePicker from '../LanguagePicker.astro';
+---
+
+<div class="language-panel sl-hidden lg:sl-block print:hidden">
+	<LanguagePicker name="language" />
+</div>
+<Default />
+
+<style>
+	.language-panel {
+		padding: 1rem var(--sl-sidebar-pad-x) 0;
+	}
+</style>

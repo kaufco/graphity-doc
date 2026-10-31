@@ -1,0 +1,141 @@
+---
+title: Find the edges and nodes whose removal splits a graph
+description: "You find the bridges and articulation points: the edges and nodes whose removal splits a component of a graph read as undirected."
+api:
+  - Components.biconnectivityOf(BiAdjacentGraph)
+  - Biconnectivity.bridges()
+  - Biconnectivity.articulationPoints()
+  - BiAdjacentGraph.of(Graph)
+---
+
+import Example from '../../../components/Example.astro';
+import Api from '../../../components/Api.astro';
+import Compare from '../../../components/Compare.astro';
+import Gap from '../../../components/Gap.astro';
+import InCode from '../../../components/InCode.astro';
+
+:::note[In short]
+- <Api ref="Components.biconnectivityOf(BiAdjacentGraph)" /> reads a graph as
+  [undirected](../../glossary/#undirected-reading) and finds its
+  [bridges and articulation points](../../glossary/#bridge-and-articulation-point).
+- <Api ref="Biconnectivity.bridges()" /> returns the edges whose removal splits a
+  [component](../../glossary/#weakly-connected-component).
+- <Api ref="Biconnectivity.articulationPoints()" /> returns the nodes whose removal splits a
+  component.
+:::
+
+## Problem
+
+You want to know which single edge or single node a graph cannot lose, because some nodes would no
+longer be connected to the others. The direction of the edges does not matter for this, so the graph
+is read as undirected. An edge whose removal splits a component in two is called a bridge. A node
+whose removal splits a component is called an articulation point. You need this to find:
+
+- a cable or a router whose failure cuts a network in two;
+- a single call that is all that connects two areas of a program;
+- a module through which every [path](../../glossary/#path) between two halves of a system passes.
+
+## Example
+
+The example graph `calls` models the calls between the methods of a small program. It has an edge
+from each method to each method it calls. Here, the graph is read as undirected. Without which
+single call, and without which method, are some methods no longer connected to the others?
+
+<Compare
+  before="The calls, read as undirected"
+  after="Bridges and articulation points"
+  legend={{ cycleEdge: 'Call on a cycle', outputNode: 'Articulation point', outputEdge: 'Bridge' }}
+>
+
+```mermaid
+flowchart TB
+  m0["0: main"]
+  m1["1: parseArgs"]
+  m2["2: run"]
+  m3["3: load"]
+  m4["4: save"]
+  m5["5: show"]
+  m6["6: parse"]
+  m7["7: format"]
+  m8["8: read"]
+  m9["9: write"]
+  m0 --- m1
+  m0 --- m2
+  m2 --- m3
+  m2 --- m4
+  m2 --- m5
+  m3 --- m6
+  m3 --- m8
+  m4 --- m7
+  m4 --- m9
+  m5 --- m7
+  m6 --- m6
+  m7 --- m7
+```
+
+```mermaid
+flowchart TB
+  m0["0: main"]
+  m1["1: parseArgs"]
+  m2["2: run"]
+  m3["3: load"]
+  m4["4: save"]
+  m5["5: show"]
+  m6["6: parse"]
+  m7["7: format"]
+  m8["8: read"]
+  m9["9: write"]
+  m0 --- m1
+  m0 --- m2
+  m2 --- m3
+  m2 --- m4
+  m2 --- m5
+  m3 --- m6
+  m3 --- m8
+  m4 --- m7
+  m4 --- m9
+  m5 --- m7
+  m6 --- m6
+  m7 --- m7
+  classDef outputNode fill:#10b98126,stroke:#10b981,stroke-width:2px,color:#1f2328
+  class m0,m2,m3,m4 outputNode
+  linkStyle 0,1,2,5,6,8 stroke:#10b981,stroke-width:3px
+  linkStyle 3,4,7,9,10,11 stroke:#f59e0b,stroke-width:3px
+```
+
+</Compare>
+
+In the picture after, the bridges and the articulation points are green. The orange edges lie on a
+[cycle](../../glossary/#cycle), and none of them is a bridge. Four of them are the calls through
+`run`, `save`, `format` and `show`. The other two are the [self-loops](../../glossary/#self-loop) of
+`parse` and `format`, and each of these is a cycle of its own.
+
+## Solution
+
+The analysis follows the edges in both directions, so it takes a <Api ref="BiAdjacentGraph" />,
+which <Api ref="BiAdjacentGraph.of(Graph)" /> builds from the graph:
+
+<Example java="guide/FindingBridges.java#biconnectivity" />
+
+Six calls are bridges: every call between two different methods except the four on the cycle through
+`run`, `save`, `format` and `show`. Four methods are articulation points:
+
+- Without `main`, `parseArgs` is connected to no other method.
+- Without `run`, `main` and `parseArgs` are no longer connected to the rest.
+- Without `load`, neither `parse` nor `read` is connected to another method.
+- Without `save`, `write` is connected to no other method.
+
+## Good to know
+
+- **Bridges and cycles.** An edge is a bridge exactly if it lies on no cycle of the undirected
+  reading. `run -> save` is no bridge: without it, `run` and `save` are still connected through
+  `show` and `format`.
+- **Edges in both directions.** The edges `a -> b` and `b -> a` count as one undirected edge, so a
+  graph that stores both directions still has bridges. Of a bridge stored in both directions,
+  <Api ref="Biconnectivity.bridges()" /> lists only the edge from the lower to the higher
+  [node ID](../../glossary/#node-id). Self-loops are never bridges.
+- **The [biconnected components](../../glossary/#biconnected-component)** come from the same
+  analysis. See [Divide the edges of a graph into biconnected components](../blocks/).
+- **Following the direction**, the same question is about
+  [strongly connected components](../../glossary/#strongly-connected-component). See
+  [Find the edges and nodes whose removal splits a strongly connected component](../../sccs/strong-bridges/).

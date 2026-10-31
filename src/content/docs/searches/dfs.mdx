@@ -1,0 +1,146 @@
+---
+title: Write a depth-first search without recursion
+description: You write a depth-first search of your own, with hooks that are called when a node is entered and when it is left.
+api:
+  - DfsTraverser.enterNode(int)
+  - DfsTraverser.leaveNode(int)
+  - DfsTraverser.run(int)
+  - DfsTraverser.run(IntList)
+  - DfsTraverser.run()
+  - DfsTraverser.isVisited(int)
+  - DfsTraverser.isOnStack(int)
+  - DfsTraverser.stop()
+  - Graph.outNodes(int)
+  - PreorderAncestry.subtreeSizeOf(int)
+---
+
+import Example from '../../../components/Example.astro';
+import Api from '../../../components/Api.astro';
+import Compare from '../../../components/Compare.astro';
+import Gap from '../../../components/Gap.astro';
+import InCode from '../../../components/InCode.astro';
+
+:::note[In short]
+- <Api ref="DfsTraverser" /> runs a [depth-first search](../../glossary/#depth-first-search) without
+  recursion and calls your <Api ref="DfsTraverser.enterNode(int)" /> when it
+  [reaches](../../glossary/#reach) a node.
+- <Api ref="DfsTraverser.leaveNode(int)" /> is called when the search leaves the node, after
+  everything it reached from there.
+- <Api ref="DfsTraverser.run(int)" label="DfsTraverser.run(int)" /> searches from a start node.
+:::
+
+## Problem
+
+You want to go through a graph and compute something on the way. Many such computations can be
+written as a depth-first search with some code of your own. Written recursively, they overflow the
+call stack on deep graphs, such as a long chain of calls or a deeply nested syntax
+[tree](../../glossary/#tree-and-forest). You need this for:
+
+- a value of each node computed from the values of its
+  [out-nodes](../../glossary/#out-node-and-in-node), such as the sizes of
+  [subtrees](../../glossary/#subtree-and-preorder) or costs;
+- the nodes in the order in which the search finishes them, such as each method after the methods it
+  calls, if the calls have no [cycle](../../glossary/#cycle);
+- a search that stops at the first node that matches.
+
+## Example
+
+The example graph `family` models a family tree with one [parent](../../glossary/#parent-and-child)
+per person, over four generations. It has an edge from each parent to each child. `Ada` is the
+[root](../../glossary/#root-node), and her children are `Ben` and `Cleo`. How many
+[descendants](../../glossary/#ancestor-and-descendant) does each person have? These are the person's
+children, grandchildren and so on, without the person. The picture after shows the counts in
+brackets:
+
+<Compare
+  before="The family tree"
+  after="The number of descendants of each person"
+  legend={{ inputNode: 'Start node', outputNode: 'Person with the number of descendants' }}
+>
+
+```mermaid
+flowchart TB
+  p0["0: Ada"]
+  p1["1: Ben"]
+  p2["2: Cleo"]
+  p3["3: Dora"]
+  p4["4: Emil"]
+  p5["5: Finn"]
+  p6["6: Greta"]
+  p7["7: Hugo"]
+  p8["8: Ida"]
+  p9["9: Jonas"]
+  p0 --> p1
+  p0 --> p2
+  p1 --> p3
+  p1 --> p4
+  p2 --> p5
+  p3 --> p6
+  p3 --> p7
+  p5 --> p8
+  p5 --> p9
+  classDef inputNode fill:#3b82f626,stroke:#3b82f6,stroke-width:2px,color:#1f2328
+  class p0 inputNode
+```
+
+```mermaid
+flowchart TB
+  p0["0: Ada (9)"]
+  p1["1: Ben (4)"]
+  p2["2: Cleo (3)"]
+  p3["3: Dora (2)"]
+  p4["4: Emil (0)"]
+  p5["5: Finn (2)"]
+  p6["6: Greta (0)"]
+  p7["7: Hugo (0)"]
+  p8["8: Ida (0)"]
+  p9["9: Jonas (0)"]
+  p0 --> p1
+  p0 --> p2
+  p1 --> p3
+  p1 --> p4
+  p2 --> p5
+  p3 --> p6
+  p3 --> p7
+  p5 --> p8
+  p5 --> p9
+  classDef outputNode fill:#10b98126,stroke:#10b981,stroke-width:2px,color:#1f2328
+  class p0,p1,p2,p3,p4,p5,p6,p7,p8,p9 outputNode
+```
+
+</Compare>
+
+## Solution
+
+<Api ref="DfsTraverser.leaveNode(int)" label="leaveNode" /> is called after the search has finished
+the subtree of a node, so the counts of its children are ready:
+
+<Example java="guide/WritingSearches.java#dfs" />
+
+<InCode java="count" rust="count" ts="count" csharp="Count" /> holds the number of descendants of
+each person: 9 for `Ada`, 4 for `Ben`, 3 for `Cleo`, and 0 for each person without children, as in
+the picture after.
+
+## Good to know
+
+- **Where to start.** <Api ref="DfsTraverser.run(int)" label="DfsTraverser.run(int)" /> starts at
+  one node. <Api ref="DfsTraverser.run(IntList)" label="DfsTraverser.run(IntList)" /> starts at
+  several nodes in turn. <Api ref="DfsTraverser.run()" label="DfsTraverser.run()" /> starts at every
+  node not visited yet, in ascending order. The visited nodes add up over the runs of one traverser:
+  a later run skips the nodes that an earlier one visited.
+- **Pruning.** <Api ref="DfsTraverser.enterNode(int)" label="enterNode" /> returns whether to search
+  from the out-nodes of a node, and `false` skips them. In a tree, that skips the subtrees of its
+  children. In other graphs, the search may still reach those nodes from another node.
+- **State.** <Api ref="DfsTraverser.isVisited(int)" /> tells whether the search has reached a node.
+  <Api ref="DfsTraverser.isOnStack(int)" /> tells whether the node is on the current
+  [path](../../glossary/#path). <Api ref="DfsTraverser.stop()" /> ends the run from a hook.
+- **The order.** Out-nodes are searched in ascending order, so a graph always gives the same search.
+- **Ready-made.** The number of descendants of a node in a tree is
+  <Api ref="PreorderAncestry.subtreeSizeOf(int)" /> minus 1. See [List a node and all its
+  descendants](../../trees/subtrees/). You may also want an order in which each method comes after
+  the methods it calls, and in which the methods on a common cycle come together. See [Put the nodes
+  in dependency order although the graph has cycles](../../sccs/order-despite-cycles/). A search of
+  your own is for values that Graphity does not compute, such as a sum of your own data over each
+  subtree.
+- **Every edge.** To see the edges as well and decide which to follow, see
+  [React to every edge of a depth-first search](../dfs-edges/).

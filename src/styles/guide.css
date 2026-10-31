@@ -1,0 +1,112 @@
+/* Mermaid diagrams (src/lib/mermaid.mjs). */
+.mermaid-diagram {
+	overflow-x: auto;
+}
+.mermaid-diagram svg {
+	display: block;
+	margin-inline: auto;
+	height: auto;
+}
+
+/* Sidebar (astro.config.mjs): a chapter as a heading, its problems indented below it. */
+.sidebar-content a.sidebar-chapter {
+	font-weight: 600;
+	margin-top: 0.5rem;
+}
+.sidebar-content a.sidebar-problem {
+	padding-inline-start: 1.5rem;
+	font-size: var(--sl-text-sm);
+}
+
+/* Lists of problems (ProblemList, Contents, ApiIndex): the number in front of each title. */
+.problem-number {
+	margin-inline-end: 0.25em;
+	font-variant-numeric: tabular-nums;
+}
+.problem-list {
+	list-style: none;
+	padding-inline-start: 0;
+}
+.problem-list li {
+	margin-block: 0.5rem;
+}
+.problem-list .problem-description {
+	display: block;
+	color: var(--sl-color-gray-2);
+	font-size: var(--sl-text-sm);
+}
+.guide-contents h2 a {
+	text-decoration: none;
+}
+/* <PerLanguage>: a list right after a list reads as its continuation. */
+.sl-markdown-content :is(ul, ol) + .per-language:has(> div > div > :is(ul, ol):first-child) {
+	margin-top: 0.25rem;
+}
+.sl-markdown-content .per-language > div,
+.sl-markdown-content .per-language > div > div > :first-child {
+	margin-top: 0;
+}
+.api-index dd ul {
+	list-style: none;
+	padding-inline-start: 0;
+	margin-top: 0.25rem;
+}
+
+/* Figure: a single diagram with its legend. */
+.figure {
+	display: grid;
+	gap: 0.5rem;
+	margin-inline: 0;
+}
+.figure > * {
+	margin-top: 0 !important;
+}
+
+/* Compare: a diagram before and after, side by side; stacked on a narrow screen. */
+.compare {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 0.5rem 1.5rem;
+	margin-inline: 0;
+	align-items: start;
+}
+.compare > :nth-child(1) { order: 1; }
+.compare > :nth-child(3) { order: 2; }
+.compare > :nth-child(2) { order: 3; }
+.compare > :nth-child(4) { order: 4; }
+.compare > .legend { order: 5; }
+@media (min-width: 50rem) {
+	.compare {
+		grid-template-columns: 1fr 1fr;
+	}
+	.compare > :nth-child(n) { order: 0; }
+	.compare > .legend { grid-column: 1 / -1; }
+}
+.compare-caption {
+	font-size: var(--sl-text-sm);
+	font-weight: 600;
+	color: var(--sl-color-gray-2);
+	text-align: center;
+	margin-top: 0 !important;
+}
+.compare .mermaid-diagram,
+.compare .legend {
+	margin-top: 0 !important;
+}
+.compare .mermaid-diagram svg {
+	min-width: 0 !important;
+}
+
+/* Pictures drawn by Graphviz (showing/graphviz*.svg). */
+.sl-markdown-content img[src*='graphviz'] {
+	display: block;
+	margin-inline: auto;
+}
+
+/* The link from an example to its whole source file. */
+.example-source {
+	display: block;
+	margin-top: 0.25rem;
+	font-size: var(--sl-text-xs);
+	text-align: right;
+}

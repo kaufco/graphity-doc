@@ -1,0 +1,333 @@
+---
+title: Glossary
+description: The terms of graph theory and of Graphity that this guide uses.
+---
+
+import Api from '../../components/Api.astro';
+
+## Adjacency list
+
+An adjacency list is a graph written as one line per node. Each line holds a node and its
+[out-nodes](#out-node-and-in-node), such as `1 -> [3, 4, 6]`.
+
+## Ancestor and descendant
+
+In a [tree or forest](#tree-and-forest), a node `a` is an ancestor of a node `b` if `a` lies on the
+[path](#path) from the [root](#root-node) to `b`. Then `b` is a descendant of `a`. In this guide and
+in Graphity, a node is its own ancestor and its own descendant.
+
+## Basic block
+
+A basic block is a stretch of code that runs from top to bottom. No jump leads into it or out of it,
+except at its start and at its end. The nodes of a [control-flow graph](#control-flow-graph) are
+basic blocks.
+
+## Biconnected component
+
+A biconnected component is a [group](#partition-and-group) of edges in which any two edges lie on a
+common [cycle](#cycle) of the [undirected reading](#undirected-reading). The group is as large as it
+can be. A biconnected component is also called a block. Its nodes stay connected if any one of them
+is removed.
+
+## Bipartite
+
+In the [undirected reading](#undirected-reading), a graph is bipartite if its nodes split into two
+sets so that every edge runs from one set to the other.
+
+## Breadth-first search
+
+A breadth-first search (BFS) visits the nodes in the order of their [distance](#distance) from its
+start node. With several start nodes, the distance counts from the nearest one. The search visits
+the start nodes first, then the nodes one edge away, then those two edges away, and so on.
+
+## Bridge and articulation point
+
+In the [undirected reading](#undirected-reading), a bridge is an edge whose removal increases the
+number of [connected components](#weakly-connected-component). An articulation point is a node
+whose removal does the same.
+
+## Condensed graph
+
+A condensed graph has one node for each group of a [partition](#partition-and-group) of the nodes.
+It has an edge `g -> h` wherever an edge of the original graph runs from a node in group `g` to a
+node in group `h`. Edges inside a group are left out. The edges from one group to another become one
+edge. The condensed graph of the [strongly connected components](#strongly-connected-component) is
+a [DAG](#dag) (directed acyclic graph).
+
+## Control dependence
+
+A block is control dependent on a branch if the outcome of the branch decides whether the block
+runs.
+
+## Control-flow graph
+
+A control-flow graph (CFG) is the graph of the [paths](#path) that the execution of a function can
+take. It has a node for each [basic block](#basic-block). It has an edge `a -> b` if execution can
+continue with block `b` after block `a`.
+
+## CSR layout
+
+The CSR layout (compressed sparse row) is a way to store a graph in two arrays. One array holds the
+[out-nodes](#out-node-and-in-node) of all nodes, node after node. The other holds the position where
+the out-nodes of each node start, followed by the number of edges. Graphity keeps every graph this
+way.
+
+## Cycle
+
+A cycle is a [path](#path) of edges that leads from a node back to the same node, such as
+`a -> b -> c -> a`. The shortest cycle is a [self-loop](#self-loop), which is an edge from a node to
+itself. In the [undirected reading](#undirected-reading), a cycle uses no edge twice, and `a -> b`
+and `b -> a` count as one undirected edge. So going along an edge and back is no cycle.
+
+## DAG
+
+A DAG (directed acyclic graph) is a directed graph without a [cycle](#cycle). Its nodes can be put
+in an order in which every edge points forward. Such an order is a
+[topological order](#topological-order).
+
+## Depth
+
+In a [tree or forest](#tree-and-forest), the depth of a node is the number of edges from the
+[root](#root-node) to the node. A root has depth 0.
+
+## Depth-first search
+
+A depth-first search (DFS) goes from a node as deep along
+[outgoing edges](#outgoing-and-incoming-edge) as it can before it turns back. The edges it meets are
+tree, back, forward or [cross edges](#tree-back-forward-and-cross-edge).
+
+## Distance
+
+The distance from a node `a` to a node `b` is the number of edges on a shortest [path](#path) from
+`a` to `b`. A node has distance 0 from itself. A node that is not [reached](#reach) has no distance.
+
+## Dominance frontier
+
+The dominance frontier of a block `d` holds every block `m` such that `d` [dominates](#dominator)
+an [in-node](#out-node-and-in-node) of `m` but does not strictly dominate `m`. The iterated
+dominance frontier of a set of blocks starts with their dominance frontier. It then adds the
+dominance frontier of each block in it, and so on until no block is added.
+
+## Dominator
+
+A node `d` dominates a node `n` if every [path](#path) from an [entry](#entry-and-exit) to `n`
+passes through `d`. Every node dominates itself. A node `d` strictly dominates `n` if it dominates
+`n` and is not `n`. The nearest strict dominator of `n` is its immediate dominator. The immediate
+dominators form the dominator tree. A node `p` post-dominates `n` if every path from `n` to an exit
+passes through `p`.
+
+## Edge index
+
+The edge index is the number of an edge. The edges of a graph are numbered from 0 in the order of
+their [source](#source-and-target) and then their target. Data on edges is kept in arrays indexed by
+edge index.
+
+## Entry and exit
+
+An entry of a graph is a node where the [paths](#path) of interest start. In a
+[control-flow graph](#control-flow-graph), the entry is the block where the function starts. A graph
+can have several entries, such as the entry points of a program. An exit is a node where the paths
+of interest end. In a control-flow graph, an exit is a block where the function returns.
+
+## Leaf
+
+A leaf is a node without [out-nodes](#out-node-and-in-node): it has no
+[outgoing edges](#outgoing-and-incoming-edge). In a [tree](#tree-and-forest), a leaf is a node
+without [children](#parent-and-child).
+
+## Level
+
+In a [DAG](#dag), the level of a node is the number of edges on a longest [path](#path) to it from a
+[root node](#root-node). Nodes of the same level of a DAG have no path between them. In a
+[breadth-first search](#breadth-first-search), the level of a node is its [distance](#distance) from
+the nearest start node.
+
+## Loop
+
+In a [control-flow graph](#control-flow-graph), a loop is a set of blocks that execution can run
+through again and again. Every block of a loop lies on a [cycle](#cycle) through its
+[header](#loop-header). The body of a loop is its header with the other blocks of the loop. These
+include the blocks of the loops nested in it. Loops nest: a loop can lie in the body of another
+loop.
+
+## Loop header
+
+The header of a [loop](#loop) is the block through which the loop is entered. It is usually where
+the test of a `for` or `while` loop sits. A loop that can be entered at more than one block is
+*irreducible*. Graphity then takes as its header the one of these blocks that a
+[depth-first search](#depth-first-search) from the [entry](#entry-and-exit) reaches first. The
+entries of a loop are the blocks at which execution can enter it from outside. They are its header
+and, in an irreducible loop, other blocks as well.
+
+## Lowest common ancestor
+
+The lowest common ancestor (LCA) of two nodes is the [deepest](#depth) node that is an
+[ancestor](#ancestor-and-descendant) of both.
+
+## Mapping
+
+A mapping is a list that says which node or edge of the original graph each node or edge of a
+transformed graph comes from. A mapping can also go the other way round. A mapping is partial if
+some of its entries have no counterpart.
+
+## Natural loop
+
+A natural loop is a [loop](#loop) that is entered only through its [header](#loop-header). Every
+loop written with `for` or `while` is a natural loop.
+
+## Neighbor
+
+A neighbor of a node is a node connected to it by an edge in either direction. It is an
+[out-node or an in-node](#out-node-and-in-node) of that node.
+
+## Node ID
+
+The node ID is the number of a node. The nodes of a graph are numbered from 0 to the node count
+minus 1. Data on nodes is kept in arrays indexed by node ID.
+
+## Out-degree and in-degree
+
+The out-degree of a node is the number of its [out-nodes](#out-node-and-in-node). Its in-degree is
+the number of its in-nodes. Their sum is called the degree. It is the number of edges at the node,
+and a [self-loop](#self-loop) counts twice.
+
+## Out-node and in-node
+
+The out-nodes of a node `a` are the [targets](#source-and-target) of its
+[outgoing edges](#outgoing-and-incoming-edge): the nodes `b` with an edge `a -> b`. Its in-nodes are
+the sources of its incoming edges. A <Api ref="Graph" /> stores the out-nodes of every node; a
+<Api ref="BiAdjacentGraph" /> stores the in-nodes as well.
+
+## Outgoing and incoming edge
+
+The outgoing edges of a node are the edges with the node as their
+[source](#source-and-target). Its incoming edges are the edges with the node as their target. A
+[self-loop](#self-loop) is both. In the API, they are called out-edges and in-edges.
+
+## Parent and child
+
+In a [tree or forest](#tree-and-forest), the parent of a node is its single
+[in-node](#out-node-and-in-node). The node is a child of its parent.
+
+## Partition and group
+
+A partition is a division of the nodes or the edges of a graph into groups. Each node or edge is in
+at most one group. A group is known by its group ID. The
+[strongly connected components](#strongly-connected-component) are a partition of the nodes. The
+[biconnected components](#biconnected-component) are a partition of the edges.
+
+## Path
+
+A path is a sequence of edges in which each edge starts where the one before it ends. It leads from
+the [source](#source-and-target) of its first edge to the target of its last edge. A graph is a path
+if it is a [tree](#tree-and-forest) in which every node has at most one
+[out-node](#out-node-and-in-node). Its edges then form one path through all its nodes. The empty
+graph counts as a path.
+
+## Reach
+
+A node `a` reaches a node `b` if a [path](#path) of edges leads from `a` to `b`. Every node reaches
+itself.
+
+## Root node
+
+A root node is a node without [in-nodes](#out-node-and-in-node): it has no
+[incoming edges](#outgoing-and-incoming-edge). Examples are the root of a [tree](#tree-and-forest)
+and the first steps of a plan.
+
+## Self-loop
+
+A self-loop is an edge from a node to itself, such as `a -> a`.
+
+## Source and target
+
+An edge `a -> b` runs from its source `a` to its target `b`.
+
+## SSA form and phi-node
+
+SSA form (static single assignment) is a form of code in which every variable is assigned exactly
+once. Where different assignments meet, a phi-node picks the value of the [path](#path) that was
+taken.
+
+## Strong bridge and strong articulation point
+
+A strong bridge is an edge whose removal increases the number of
+[strongly connected components](#strongly-connected-component). A strong articulation point is a
+node whose removal does the same.
+
+## Strongly connected component
+
+A strongly connected component (SCC) is a [group](#partition-and-group) of nodes in which every
+node [reaches](#reach) every other. The group is as large as it can be. Every node is in exactly one
+SCC. A node on no [cycle](#cycle) is an SCC of its own.
+
+## Subgraph
+
+A subgraph is a graph made of some of the nodes of a graph and edges between them. Graphity takes
+the subgraph *induced* by the nodes it keeps: every edge between them stays. It numbers the nodes of
+a subgraph anew from 0, in ascending order of their old [node IDs](#node-id). A [mapping](#mapping)
+gives the old node ID of each new node.
+
+## Subtree and preorder
+
+The subtree of a node is the node with all its [descendants](#ancestor-and-descendant). A preorder
+lists the nodes of a [tree](#tree-and-forest) in the order in which a [depth-first
+search](#depth-first-search) from its [root](#root-node) reaches them. Each node comes before the
+subtrees of its [children](#parent-and-child), and these follow one after the other. The preorder of
+a forest lists one tree after the other. So every node comes before its descendants, and each
+subtree takes a range of consecutive positions.
+
+## Topological order
+
+A topological order is an order of the nodes of a [DAG](#dag) in which the
+[source](#source-and-target) of every edge comes before its target.
+
+## Transitive closure and reduction
+
+The transitive closure of a graph has an edge `u -> v` wherever a [path](#path) of one or more
+edges leads from `u` to `v`. A node has a [self-loop](#self-loop) in it exactly when the node lies
+on a [cycle](#cycle). The transitive reduction of a [DAG](#dag) keeps an edge `u -> v` only if no
+other path leads from `u` to `v`.
+
+## Transposed graph
+
+The transposed graph of a graph has the same nodes and every edge turned around: `a -> b` becomes
+`b -> a`. The nodes that [reach](#reach) a node in a graph are the nodes that it reaches in the
+transposed graph.
+
+## Tree and forest
+
+A forest is a graph without [cycles](#cycle) in which every node has at most one
+[in-node](#out-node-and-in-node). This in-node is the [parent](#parent-and-child) of the node. So
+the edges point away from the [root nodes](#root-node). A tree is a forest with at most one root
+node. The empty graph counts as a tree. In the [undirected reading](#undirected-reading), a forest
+is a graph without cycles. A tree in that reading is a forest that is connected. Graphity's checks
+for them ignore self-loops.
+
+## Tree, back, forward and cross edge
+
+A [depth-first search](#depth-first-search) meets four types of edges:
+
+- A tree edge leads to a node the search had not seen yet.
+- A back edge leads back to a node on the current [path](#path) and closes a [cycle](#cycle).
+- A forward edge leads to a node that the search has already reached from the edge's source along
+  one or more tree edges.
+- A cross edge leads to a node that the search has already finished and that is neither an
+  [ancestor nor a descendant](#ancestor-and-descendant) of the edge's source.
+
+## Undirected reading
+
+The undirected reading treats a directed graph as if its edges had no direction. An edge `a -> b`
+connects `a` and `b`, and `a -> b` and `b -> a` count as one undirected edge. A
+[self-loop](#self-loop) is still a [cycle](#cycle) of its own, but the methods for this reading
+ignore it. The checks for trees and forests do not count it. It is never a
+[bridge](#bridge-and-articulation-point), and it lies in no
+[biconnected component](#biconnected-component). The one exception is the test for a
+[bipartite](#bipartite) graph: a self-loop makes a graph not bipartite.
+
+## Weakly connected component
+
+A weakly connected component is a [group](#partition-and-group) of nodes that [paths](#path) connect
+when the direction of the edges does not matter, as in the
+[undirected reading](#undirected-reading). The group is as large as it can be. In a graph that
+stands for an undirected one, it is simply called a connected component.

@@ -1,0 +1,80 @@
+---
+// The legend of a picture: its columns, each with the marks that it uses there, drawn as in the
+// picture (legendColumns in src/lib/legend.mjs).
+interface Props {
+	columns: {
+		key: string;
+		title: string;
+		entries: { key: string; name: string; shape: string; color: string; fill?: string; width: number; dash?: string; arrow: boolean }[];
+	}[];
+}
+
+const { columns } = Astro.props;
+---
+
+{
+	columns.length > 0 && (
+		<div class="legend not-content" role="group" aria-label="Legend" data-pagefind-ignore="">
+			{columns.map((column) => (
+				<div class="legend-column">
+					<div class="legend-title">{column.title}</div>
+					<ul>
+						{column.entries.map((mark) => (
+							<li>
+								<svg width="28" height="14" viewBox="0 0 28 14" aria-hidden="true">
+									{mark.shape === 'edge' ? (
+										<>
+											<path d={mark.arrow ? 'M1 7H21' : 'M1 7H27'} stroke={mark.color} stroke-width={mark.width} stroke-dasharray={mark.dash} fill="none" />
+											{mark.arrow && <path d="M20 2.5L27 7L20 11.5Z" fill={mark.color} />}
+										</>
+									) : (
+										<rect x="1.5" y="1.5" width="25" height="11" fill={mark.fill} stroke={mark.color} stroke-width={mark.width} />
+									)}
+								</svg>
+								{mark.name}
+							</li>
+						))}
+					</ul>
+				</div>
+			))}
+		</div>
+	)
+}
+
+<style>
+	.legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem 2rem;
+		width: fit-content;
+		max-width: 100%;
+		padding: 0.5rem 0.75rem;
+		border-radius: 6px;
+		background-color: var(--sl-color-gray-6);
+		color: var(--sl-color-gray-2);
+		font-size: var(--sl-text-xs);
+		line-height: 1.25;
+	}
+	.legend-title {
+		margin-bottom: 0.25rem;
+		color: var(--sl-color-white);
+		font-weight: 600;
+	}
+	.legend ul {
+		display: grid;
+		gap: 0.25rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.legend li {
+		display: flex;
+		gap: 0.375rem;
+		align-items: center;
+		margin: 0;
+		white-space: nowrap;
+	}
+	.legend svg {
+		flex: none;
+	}
+</style>

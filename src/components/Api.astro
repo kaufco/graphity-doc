@@ -1,0 +1,46 @@
+---
+// An inline link into the API documentation: <Api ref="Components.sccsOf(Graph)" /> renders
+// <code>Components.sccsOf</code> as a link into the Javadoc. `ref` uses the syntax described in
+// src/lib/java-api.mjs; `label` overrides the text of the Java form. An unknown class, method or
+// overload fails the build. With other languages in the build, each shows its own name and link,
+// following the language picker, in the form that `label` asks for (portLabel in
+// src/lib/lang-api.mjs); where a language has no counterpart, the Java name stands, without a link.
+// The search index holds the Java name only (README, "Search").
+import { resolveRef } from '../lib/java-api.mjs';
+import { portLabel, portTargets } from '../lib/lang-api.mjs';
+
+interface Props {
+	ref: string;
+	label?: string;
+}
+
+const { ref, label } = Astro.props;
+let target;
+let ports;
+try {
+	target = resolveRef(ref);
+	ports = portTargets(ref);
+} catch (error) {
+	throw new Error(`<Api> on ${Astro.url.pathname}: ${(error as Error).message}`);
+}
+const javaLabel = label ?? target.label;
+---
+
+{
+	ports.length === 0 ? (
+		<a class="api-link" href={target.url}><code>{javaLabel}</code></a>
+	) : (
+		<>
+			<a class="api-link lang-java" href={target.url}><code>{javaLabel}</code></a>
+			{ports.map((port) =>
+				port.url ? (
+					<a class={`api-link lang-${port.key}`} href={port.url} title={port.note ?? undefined} data-pagefind-ignore="">
+						<code>{portLabel(port, javaLabel, target)}</code>
+					</a>
+				) : (
+					<code class={`lang-${port.key}`} title={port.reason ?? undefined} data-pagefind-ignore="">{port.label ?? javaLabel}</code>
+				),
+			)}
+		</>
+	)
+}

@@ -1,0 +1,24 @@
+---
+// The contents of the whole guide: every chapter with its problems, numbered and described.
+import { guideStructure } from '../lib/structure.mjs';
+import ProblemList from './ProblemList.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+---
+
+<div class="guide-contents">
+	{
+		guideStructure().map((chapter) => (
+			<section>
+				<h2 id={chapter.slug}>
+					<a href={`${base}${chapter.slug}/`}>
+						<span class="problem-number">{chapter.number}</span>{' '}
+						{chapter.title}
+					</a>
+				</h2>
+				<p>{chapter.description}</p>
+				<ProblemList problems={chapter.problems} />
+			</section>
+		))
+	}
+</div>

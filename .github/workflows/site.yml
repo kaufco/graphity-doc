@@ -1,0 +1,85 @@
+# Builds the guide for every pull request and every push, against the libraries in the versions
+# that languages.json names, and deploys it to GitHub Pages on a push to main.
+#
+# The build fails when a page refers to an example region or an API that those versions do not
+# have. `npm run api-coverage` then lists the part of the published API that no page uses; it fails
+# only on a reference it cannot resolve.
+#
+# The deploy job is guarded with `if: github.repository == 'kaufco/graphity-doc'`, so that forks do
+# not attempt a Pages deploy they have neither the settings nor the permissions for. The repository
+# setting "Pages source" must be "GitHub Actions".
+
+name: Site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push to a pull request supersedes the running build; a run on main is never cancelled,
+# so that a deploy is not cut off halfway.
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Check out the documented libraries
+        run: npm run languages
+
+      - name: Install Chromium for the diagrams
+        # Mermaid renders the diagrams at build time, in a headless Chromium.
+        run: npx playwright install --with-deps --only-shell chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: API coverage
+        run: npm run api-coverage
+
+      - name: Keep the site for the deploy
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    if: >-
+      github.repository == 'kaufco/graphity-doc'
+      && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

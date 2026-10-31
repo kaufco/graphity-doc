@@ -1,0 +1,41 @@
+---
+// Code from the example sources: <Example java="guide/FindingLoops.java#loops" />. The path is relative
+// to the language's example directory (src/lib/languages.mjs), the part after # names the region. The
+// other languages keep their version of it in the file their naming convention gives
+// (counterpartOf: guide/finding_loops.rs#loops in Rust); a prop such as rust="..." names another. The
+// page shows the version in the language the reader selected (LanguagePicker). Every language of
+// the build needs its version; a missing file or region fails the build. Below the code, a link leads
+// to the whole file in the repository of the language, with the lines of the region marked.
+import { Code } from '@astrojs/starlight/components';
+import { AVAILABLE_LANGUAGES, LANGUAGES, loadExample } from '../lib/examples.mjs';
+import { counterpartOf } from '../lib/languages.mjs';
+
+type Props = { [key: string]: string | undefined };
+
+const where = `<Example> on ${Astro.url.pathname}`;
+const unknown = Object.keys(Astro.props).filter((key) => !LANGUAGES.some((language) => language.key === key));
+if (unknown.length) {
+	throw new Error(`${where}: unknown prop ${unknown.join(', ')}; languages: ${LANGUAGES.map((l) => l.key).join(', ')}`);
+}
+if (Astro.props.java === undefined) {
+	throw new Error(`${where}: no java="File.java#region"`);
+}
+const versions = AVAILABLE_LANGUAGES.map((language) => {
+	try {
+		const spec = Astro.props[language.key] ?? counterpartOf(language, Astro.props.java!);
+		return { ...language, ...loadExample(language, spec) };
+	} catch (error) {
+		throw new Error(`${where}: ${(error as Error).message}`);
+	}
+});
+const single = versions.length === 1;
+---
+
+{
+	versions.map((version) => (
+		<div class={single ? 'example' : `example lang-${version.key}`} data-pagefind-ignore="">
+			<Code code={version.code} lang={version.lang} />
+			<a class="example-source not-content" href={version.source}>Full example</a>
+		</div>
+	))
+}

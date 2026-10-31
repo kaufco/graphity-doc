@@ -1,0 +1,23 @@
+---
+// A numbered list of problems with their descriptions, linked: on a chapter page the problems of
+// that chapter, on the contents page those of every chapter. From src/lib/structure.mjs.
+interface Props {
+	problems: { slug: string; number: string; title: string; description: string }[];
+}
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+---
+
+<ul class="problem-list">
+	{
+		Astro.props.problems.map((p) => (
+			<li>
+				<a href={`${base}${p.slug}/`}>
+					<span class="problem-number">{p.number}</span>{' '}
+					{p.title}
+				</a>
+				<span class="problem-description">{p.description}</span>
+			</li>
+		))
+	}
+</ul>

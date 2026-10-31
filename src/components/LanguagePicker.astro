@@ -1,0 +1,126 @@
+---
+// The language of the whole guide: the code examples, and the names and code in the text (<Api>,
+// <InCode>, "API used", the index by API), show the selected language. A list above "On this page"
+// (overrides/PageSidebar.astro), a dropdown in the bar that stands in for that column on a narrow
+// screen (overrides/MobileTableOfContents.astro). Shown only when the build has more than one
+// language. The choice is kept in localStorage; the script in the head of every page
+// (astro.config.mjs) applies it as html[data-language] before the page is painted, and the style
+// there marks the selected language, so that nothing flickers. A link from outside can name the
+// language as ?lang=<key>.
+import { Icon } from '@astrojs/starlight/components';
+import { AVAILABLE_LANGUAGES } from '../lib/languages.mjs';
+import LanguageOptions from './LanguageOptions.astro';
+
+interface Props {
+	/** The name of the radio group; each picker on a page needs its own. */
+	name: string;
+	dropdown?: boolean;
+}
+
+const { name, dropdown = false } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+---
+
+{
+	AVAILABLE_LANGUAGES.length > 1 && (
+		<guide-language-picker>
+			{dropdown ? (
+				<details>
+					<summary aria-label="Language">
+						{AVAILABLE_LANGUAGES.map((language) => (
+							<span class={`selected lang-${language.key}`}>
+								<img src={`${base}logos/${language.key}.svg`} alt="" width="24" height="20" />
+								{language.label}
+							</span>
+						))}
+						<Icon name="right-caret" class="caret" size="1rem" />
+					</summary>
+					<div class="dropdown">
+						<LanguageOptions name={name} hideLegend />
+					</div>
+				</details>
+			) : (
+				<LanguageOptions name={name} />
+			)}
+		</guide-language-picker>
+	)
+}
+
+<script>
+	const storageKey = 'graphity-guide-language';
+
+	class LanguagePicker extends HTMLElement {
+		constructor() {
+			super();
+			const details = this.querySelector('details');
+			const close = () => {
+				if (!details?.open) return;
+				details.open = false;
+				details.querySelector('summary')?.focus();
+			};
+			for (const radio of this.querySelectorAll<HTMLInputElement>('input')) {
+				radio.checked = radio.value === document.documentElement.dataset.language;
+				radio.addEventListener('change', () => {
+					document.documentElement.dataset.language = radio.value;
+					try {
+						localStorage.setItem(storageKey, radio.value);
+					} catch {}
+					// A language in the address would otherwise win over this choice on the next load.
+					const url = new URL(location.href);
+					if (url.searchParams.has('lang')) {
+						url.searchParams.set('lang', radio.value);
+						history.replaceState(history.state, '', url);
+					}
+					// The list and the dropdown are both on the page; keep them in step.
+					for (const other of document.querySelectorAll<HTMLInputElement>(`guide-language-picker input[value='${radio.value}']`)) {
+						other.checked = true;
+					}
+				});
+				// Also on the entry already selected, which fires no change.
+				radio.addEventListener('click', close);
+			}
+			if (!details) return;
+			window.addEventListener('click', (e) => {
+				if (!details.contains(e.target as Node)) details.open = false;
+			});
+			window.addEventListener('keydown', (e) => {
+				if (e.key === 'Escape') close();
+			});
+		}
+	}
+	customElements.define('guide-language-picker', LanguagePicker);
+</script>
+
+<style>
+	guide-language-picker {
+		display: block;
+	}
+	.selected {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		white-space: nowrap;
+	}
+	.selected img {
+		flex: none;
+		width: 1.5rem;
+		height: 1.25rem;
+		object-fit: contain;
+	}
+	.caret {
+		margin-inline-start: auto;
+	}
+	details[open] .caret {
+		transform: rotateZ(90deg);
+	}
+	.dropdown {
+		position: absolute;
+		inset-block-start: 100%;
+		min-width: 10rem;
+		padding-block: 0.25rem;
+		border: 1px solid var(--sl-color-hairline-shade);
+		border-radius: 0 0 0.5rem 0.5rem;
+		background-color: var(--sl-color-black);
+		box-shadow: var(--sl-shadow-md);
+	}
+</style>

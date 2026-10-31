@@ -1,0 +1,19 @@
+---
+// A single diagram with its legend: the child is a ```mermaid block, with a blank line before and
+// after it. `legend` as on <Compare>.
+import { legendColumns } from '../lib/legend.mjs';
+import Legend from './Legend.astro';
+
+interface Props {
+	legend?: Record<string, string>;
+}
+
+const { legend = {} } = Astro.props;
+const diagram = await Astro.slots.render('default');
+const columns = legendColumns(diagram, legend);
+---
+
+<figure class="figure">
+	<Fragment set:html={diagram} />
+	{columns.length > 0 && <Legend columns={columns} />}
+</figure>

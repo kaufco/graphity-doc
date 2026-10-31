@@ -1,0 +1,214 @@
+---
+title: Introduction
+description: This guide shows what you can do with graphs and how to do it with Graphity, organized by problem and not by type or function.
+---
+
+import Api from '../../components/Api.astro';
+import InCode from '../../components/InCode.astro';
+import JavadocLink from '../../components/JavadocLink.astro';
+import PerLanguage from '../../components/PerLanguage.astro';
+
+This guide shows what you can do with graphs and how to do it with Graphity. Graphity is a library
+that keeps graphs in a compact, immutable form and analyzes them. The guide is organized by problem,
+not by type or function. Each page states a problem, such as finding the groups of nodes in a graph
+that [reach](glossary/#reach) each other. It then solves the problem with a picture, a few lines of
+code and their result.
+
+## What this guide is, and what it is not
+
+<PerLanguage>
+<div slot="java">
+
+- **The [README](https://github.com/kaufco/graphity#readme)** is the overview: what Graphity
+  is, how to add it to a project, and how it compares with other libraries.
+- **The API documentation (<JavadocLink>Javadoc</JavadocLink>)** is the contract: what each class
+  and method does, what it returns and throws, and what it costs in time and memory.
+
+</div>
+<div slot="rust">
+
+- **The [README](https://github.com/kaufco/graphity-rust#readme)** is the overview: what
+  Graphity is, how to add it to a project, and how it differs from the Java library.
+- **The [API documentation](https://kaufco.github.io/graphity-rust/)** is the contract: what each
+  type and function does, what it returns and when it fails, and what it costs in time and memory.
+
+</div>
+<div slot="ts">
+
+- **The [README](https://github.com/kaufco/graphity-ts#readme)** is the overview: what Graphity
+  is, how to add it to a project, and how it differs from the Java library.
+- **The [API documentation](https://kaufco.github.io/graphity-ts/)** is the contract: what each
+  class and method does, what it returns and throws, and what it costs in time and memory.
+
+</div>
+<div slot="csharp">
+
+- **The [README](https://github.com/kaufco/graphity-csharp#readme)** is the overview: what
+  Graphity is, how to add it to a project, and how it differs from the Java library.
+- **The [API documentation](https://kaufco.github.io/graphity-csharp/)** is the contract: what
+  each class and method does, what it returns and throws, and what it costs in time and memory.
+
+</div>
+</PerLanguage>
+
+This guide sits between the two. It explains the ideas behind the algorithms, such as what a
+[strongly connected component](glossary/#strongly-connected-component) is or what a
+[loop](glossary/#loop) of a [control-flow graph](glossary/#control-flow-graph) is. It also explains
+which problems they solve. It does not explain how the algorithms work inside. The API documentation
+names the algorithm that a type or function uses.
+
+## How to read it
+
+The guide has a chapter for each area, such as *Strongly connected components* or
+*Control-flow analysis*. A chapter starts with a page that explains its ideas and lists its
+problems. A page for each problem follows. The chapters build on each other, so reading them in
+order works best. But each problem page stands on its own, and you can also go straight to the
+problem you have:
+
+- The [contents](contents/) list every chapter and every problem, with a sentence on each.
+- The [index by API](api-index/) leads from a type or function to the problems that use it. It is
+  the way in when you know a function and wonder what it is good for.
+- The search at the top of each page finds any word.
+
+A problem page has these parts, in this order:
+
+1. **A sentence** says what the page does. The lists of problems show the same sentence.
+2. **In short** gives the calls that solve the problem, for when you only need the method name.
+3. **Problem** states the problem in general terms and says where it comes up.
+4. **Example** shows one concrete case and asks its question. On most pages, it has pictures of the
+   graph before and after, side by side.
+5. **Solution** shows the code and what it returns.
+6. **Good to know** lists special cases, limits and related problems.
+7. **API used** links to the API documentation of every method the page uses.
+
+Below the first sentence of a page, a term of graph theory links to the [glossary](glossary/) at its
+first use.
+
+## Getting Graphity
+
+<PerLanguage>
+<div slot="java">
+
+Graphity needs Java 17 or newer. Add the artifact `graphity`, which brings all its modules:
+
+```xml
+<dependency>
+    <groupId>com.kobayami</groupId>
+    <artifactId>graphity</artifactId>
+    <version>3.0.0</version>
+</dependency>
+```
+
+The [README](https://github.com/kaufco/graphity#readme) has the lines for Gradle, and the
+single modules for when you want only some of them.
+
+</div>
+<div slot="rust">
+
+Graphity needs Rust 1.85 or newer. Add the crate `graphity-all`, which brings all its crates:
+
+```toml
+[dependencies]
+graphity-all = "3.0.0"
+```
+
+The [README](https://github.com/kaufco/graphity-rust#installation) lists the single crates -
+`graphity-core`, `graphity-controlflow`, `graphity-dot` and `graphity-mermaid` - for when you want
+only some of them.
+
+</div>
+<div slot="ts">
+
+Graphity runs on Node.js 22 or newer and in every browser that supports ES2022. It comes as ES
+modules with TypeScript declarations. Add the package `@kobayami/graphity`, which brings all its
+packages:
+
+```sh
+npm install @kobayami/graphity
+```
+
+The [README](https://github.com/kaufco/graphity-ts#installation) lists the single packages -
+`@kobayami/graphity-core`, `@kobayami/graphity-controlflow`, `@kobayami/graphity-dot` and
+`@kobayami/graphity-mermaid` - for when you want only some of them.
+
+</div>
+<div slot="csharp">
+
+Graphity needs .NET 10 or newer. Add the package `Graphity.All`, which brings all its packages:
+
+```sh
+dotnet add package Graphity.All
+```
+
+The [README](https://github.com/kaufco/graphity-csharp#installation) lists the single packages -
+`Graphity.Core`, `Graphity.ControlFlow`, `Graphity.Dot` and `Graphity.Mermaid` - for when you want
+only some of them.
+
+</div>
+</PerLanguage>
+
+## The model in five sentences
+
+A graph has numbered nodes and directed edges: the [node IDs](glossary/#node-id) run from 0 to the
+node count minus 1, and `a -> b` runs from its [source](glossary/#source-and-target) `a` to its
+target `b`. A <Api ref="GraphBuilder" /> builds a <Api ref="Graph" /> from edges in any order, and
+the graph never changes after that. Graphity stores no data on nodes and edges: you keep names,
+weights and everything else in arrays of your own, indexed by node ID or by
+[edge index](glossary/#edge-index). The algorithms take a graph and return results that never
+change either and that answer follow-up questions such as "which nodes are in
+[group](glossary/#partition-and-group) 2?". Where an algorithm follows edges against their
+direction, it takes a <Api ref="BiAdjacentGraph" />, which adds the
+[in-nodes](glossary/#out-node-and-in-node) of every node to a graph.
+
+## The examples
+
+<PerLanguage>
+<div slot="java">
+
+The code on these pages comes from the module
+[`graphity-examples`](https://github.com/kaufco/graphity/tree/main/graphity-examples), where it is
+compiled and tested with every build.
+
+</div>
+<div slot="rust">
+
+The code on these pages comes from the crate
+[`graphity-examples`](https://github.com/kaufco/graphity-rust/tree/main/graphity-examples), where
+it is compiled and tested with every build.
+
+</div>
+<div slot="ts">
+
+The code on these pages comes from
+[`packages/examples`](https://github.com/kaufco/graphity-ts/tree/main/packages/examples), where it
+is compiled and tested with every build.
+
+</div>
+<div slot="csharp">
+
+The code on these pages comes from the project
+[`examples/Graphity.Examples`](https://github.com/kaufco/graphity-csharp/tree/main/examples/Graphity.Examples),
+where it is compiled and tested with every build.
+
+</div>
+</PerLanguage>
+
+The results in its comments are checked, not just written down. The examples come from a few
+domains, so that one picture can serve several pages:
+
+- **A small program** is a notebook on the command line. The examples use its packages and their
+  dependencies, its methods and their calls, the control flow inside its methods, and the steps
+  that build and publish it.
+- **A small grammar** holds the rules of a small programming language.
+- **A small family tree** records one parent per person over four generations.
+
+Where a domain would only distract, as on several chapter pages, a small graph of numbers serves
+instead.
+
+Where the page offers a choice of language, pick yours there. Every example of the guide switches
+to it. So do the names of types and functions in the text and their links into the API
+documentation.
+
+Comments on results show the value in a short notation, then what it means:
+<InCode java="int header = loops.headerOf(linesLoop); // 3 - nextLine" rust="let header = loops.header_of(lines_loop); // 3 - nextLine" ts="const header = loops.headerOf(linesLoop); // 3 - nextLine" csharp="int header = loops.HeaderOf(linesLoop); // 3 - nextLine" />.
+A value that is a list stands in brackets.

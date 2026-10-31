@@ -1,0 +1,18 @@
+Solving Graph Problems with Graphity
+Copyright 2025-2026 Marco Kaufmann
+
+This project includes the following third-party images, in public/logos/. They name the
+programming languages in the language picker of the guide; the names and logos belong to their owners.
+
+java.svg - Duke, the Java mascot, from the OpenJDK Duke project (https://github.com/openjdk/duke,
+vector/Wave.svg, cropped to the figure). Open sourced by Sun Microsystems under the BSD license.
+
+rust.svg - Ferris the Rustacean, by Karen Rustad Tolva (https://rustacean.net/, from
+https://github.com/rust-lang/rust-artwork, mascot/ferris-flat-happy.svg, cropped to the figure).
+Released to the public domain under CC0 1.0.
+
+ts.svg - The TypeScript logo (https://www.typescriptlang.org/branding/, ts-logo-128.svg). TypeScript
+is a trademark of Microsoft Corporation.
+
+csharp.svg - The C# language icon, from the .NET brand repository (https://github.com/dotnet/brand,
+logo/language-icons/csharp-72.svg). Released under CC0 1.0.

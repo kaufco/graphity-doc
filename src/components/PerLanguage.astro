@@ -1,0 +1,41 @@
+---
+// Content that differs between the languages as a whole, such as how to add the library to a
+// project: one element per language, marked with the language as its slot,
+//   <PerLanguage>
+//     <div slot="java">...</div>
+//     <div slot="rust">...</div>
+//   </PerLanguage>
+// with Markdown inside each, set off by blank lines. The page shows the content of the language
+// the reader selected, like <Example>. Every language of the build needs its content; a missing
+// one fails the build. A list right after a list continues it, with the spacing of a list item
+// (src/styles/guide.css).
+import { AVAILABLE_LANGUAGES, LANGUAGES } from '../lib/languages.mjs';
+
+const where = `<PerLanguage> on ${Astro.url.pathname}`;
+// The default slot holds only the line breaks between the elements.
+const unknown = Object.keys(Astro.slots).filter(
+	(key) => key !== 'default' && !LANGUAGES.some((language) => language.key === key),
+);
+const missing = AVAILABLE_LANGUAGES.filter((language) => !Astro.slots.has(language.key));
+if (unknown.length || missing.length) {
+	throw new Error(
+		`${where}: ` + (unknown.length ? `unknown slot ${unknown.join(', ')}` : `no content for ${missing.map((l) => l.key).join(', ')}`),
+	);
+}
+const single = AVAILABLE_LANGUAGES.length === 1;
+const versions = await Promise.all(
+	AVAILABLE_LANGUAGES.map(async (language) => ({ key: language.key, html: await Astro.slots.render(language.key) })),
+);
+---
+
+<div class="per-language">
+	{
+		versions.map((version) => (
+			<div
+				class={single ? undefined : `lang-${version.key}`}
+				data-pagefind-ignore={version.key === 'java' ? undefined : ''}
+				set:html={version.html}
+			/>
+		))
+	}
+</div>

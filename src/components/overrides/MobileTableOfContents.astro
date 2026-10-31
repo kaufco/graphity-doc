@@ -1,0 +1,97 @@
+---
+// The bar that stands in for the column at the right of the page on a narrow screen: two dropdowns in
+// one row, the language, and "On this page", which shows the current section instead of its own name.
+import Default from '@astrojs/starlight/components/MobileTableOfContents.astro';
+import LanguagePicker from '../LanguagePicker.astro';
+---
+
+<div class="page-bar">
+	<LanguagePicker name="language-in-bar" dropdown />
+	<Default />
+</div>
+
+<style>
+	.page-bar {
+		position: fixed;
+		z-index: var(--sl-z-index-toc);
+		top: calc(var(--sl-nav-height) - 1px);
+		inset-inline: 0;
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+		height: var(--sl-mobile-toc-height);
+		padding-inline: 1rem;
+		border-block: 1px solid var(--sl-color-hairline-shade);
+		background-color: var(--sl-color-bg-nav);
+	}
+	@media (min-width: 50rem) {
+		.page-bar {
+			inset-inline-start: var(--sl-content-inline-start, 0);
+		}
+	}
+
+	/* Both dropdowns look the same: the summary is the button. */
+	.page-bar :global(summary) {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+		height: 2rem;
+		padding-block: 0;
+		padding-inline: 0.625rem 0.5rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.5rem;
+		background-color: var(--sl-color-black);
+		color: var(--sl-color-white);
+		font-size: var(--sl-text-sm);
+		line-height: 1;
+		list-style: none;
+		user-select: none;
+		cursor: pointer;
+	}
+	.page-bar :global(summary::-webkit-details-marker) {
+		display: none;
+	}
+	.page-bar :global(summary:hover) {
+		border-color: var(--sl-color-gray-2);
+	}
+	.page-bar :global(details[open] > summary) {
+		border-color: var(--sl-color-accent);
+	}
+	.page-bar :global(guide-language-picker) {
+		flex: none;
+		width: 8.75rem;
+	}
+
+	/* "On this page" (Starlight's MobileTableOfContents): its toggle shrinks to the caret, its name stays
+	   for screen readers, and the current section stands in the button. */
+	.page-bar :global(mobile-starlight-toc) {
+		flex: 1;
+		min-width: 0;
+	}
+	.page-bar :global(nav) {
+		position: static;
+		border: 0;
+		background: none;
+	}
+	.page-bar :global(.toggle),
+	.page-bar :global(.toggle:hover),
+	.page-bar :global(details[open] .toggle) {
+		order: 2;
+		flex: none;
+		padding: 0;
+		border: 0;
+		background: none;
+		font-size: 0;
+	}
+	.page-bar :global(.display-current) {
+		flex: 1;
+		min-width: 0;
+		line-height: 1.5;
+	}
+	.page-bar :global(mobile-starlight-toc .dropdown) {
+		position: absolute;
+		inset-block-start: 100%;
+		inset-inline: 0;
+		margin-top: 0;
+	}
+</style>
